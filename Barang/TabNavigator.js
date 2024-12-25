@@ -1,64 +1,61 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Animated, View, Text } from 'react-native'; // Untuk animasi dan indikator loading
-import ItemDescription from '../Barang/ItemDesciption';
-import ItemReviews from '../Barang/ItemReviews';
-import Colors from '../costants/color';
+import { NavigationContainer } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
+// Screens
+import ItemList from './Barang/ItemList';
+import AddPost from './Post/AddPostScreen';
+import EditPost from './Post/EditPostScreen';
+import { createStackNavigator } from '@react-navigation/stack';
+
+// Stack Navigator untuk setiap screen
 const Tab = createBottomTabNavigator();
+const Stack = createStackNavigator();
 
-export default function TabNavigator({ route }) {
-  const { item } = route.params; // Data item yang diterima dari navigasi
-  const [loading, setLoading] = useState(false); // Menyimpan status loading
-
-  // Mengatur state loading saat berpindah tab
-  const handleTabChange = () => {
-    setLoading(true);
-    setTimeout(() => setLoading(false), 1000); // Simulasi loading selama 1 detik
-  };
-
+function HomeStack() {
   return (
-    <Tab.Navigator
-      screenOptions={{
-        tabBarActiveTintColor: Colors.primary,
-        tabBarInactiveTintColor: Colors.GRAY,
-        headerShown: false,
-      }}
-      // Menangani perubahan tab
-      tabBarOptions={{
-        tabBarButton: (props) => (
-          <View {...props} onPress={() => { handleTabChange(); props.onPress(); }} />
-        ),
-      }}
-    >
-      <Tab.Screen
-        name="Description"
-        component={ItemDescription}
-        initialParams={{ item }} // Pastikan 'item' diteruskan dengan benar
-      />
-      <Tab.Screen
-        name="Reviews"
-        component={ItemReviews}
-        initialParams={{ item }} // Pastikan 'item' diteruskan dengan benar
-      />
-      
-      {/* Menampilkan animasi loading ketika berpindah tab */}
-      {loading && (
-        <Animated.View
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            justifyContent: 'center',
-            alignItems: 'center',
-            backgroundColor: 'rgba(255, 255, 255, 0.8)',
-          }}
-        >
-          <Text>Loading...</Text>
-        </Animated.View>
-      )}
-    </Tab.Navigator>
+    <Stack.Navigator>
+      <Stack.Screen name="Home" component={ItemList} />
+      <Stack.Screen name="EditPost" component={EditPost} />
+    </Stack.Navigator>
+  );
+}
+
+export default function App() {
+  return (
+    <NavigationContainer>
+      <Tab.Navigator
+        screenOptions={({ route }) => ({
+          tabBarIcon: ({ color, size }) => {
+            let iconName;
+
+            if (route.name === 'Home') {
+              iconName = 'home';
+            } else if (route.name === 'AddPost') {
+              iconName = 'add-circle';
+            }
+
+            return <Icon name={iconName} size={size} color={color} />;
+          },
+          tabBarActiveTintColor: 'blue',  // Warna aktif
+          tabBarInactiveTintColor: 'gray',  // Warna tidak aktif
+        })}
+      >
+        {/* Tab untuk ItemList (Home) */}
+        <Tab.Screen
+          name="Home"
+          component={HomeStack} // Menggunakan Stack untuk navigasi dalam Home
+          options={{ title: 'Home' }}
+        />
+
+        {/* Tab untuk AddPost */}
+        <Tab.Screen
+          name="AddPost"
+          component={AddPost}
+          options={{ title: 'Add Post' }}
+        />
+      </Tab.Navigator>
+    </NavigationContainer>
   );
 }
